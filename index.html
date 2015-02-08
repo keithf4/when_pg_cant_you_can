@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>When PostgreSQL Cant, You Can</title>
+
+		<meta name="description" content="Template for creating OmniTI themed presentations">
+		<meta name="author" content="OmniTI, Inc">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/omniti.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- If the query includes 'print-pdf', include the PDF print sheet -->
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+
+        <style>
+            #li30 li { line-height:30px }
+        </style>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>When PostgreSQL Can't, You Can</h2>
+                    <p> Presented by <a href="http://keithf4.com" target="_blank">Keith Fiske</a> / <a href="http://twitter.com/keithf4" target="_blank">@keithf4</a> </p>
+                    <p> Database Administrator @ <a href="http://www.omniti.com" target="_blank">OmniTI</a> </p>
+                    <p>
+                    <br/>
+                    <br/>
+                    Follow along at <br/><a href="http://slides.keithf4.com/whenpgcantucan">http://slides.keithf4.com/whenpgcantucan</a>
+                    </p>
+
+                </section>
+                
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>OmniTI, Inc</h2>
+                    <p>
+                        <ul>
+                            <li>Full-stack support for high-traffic websites & applications</li>
+                            <ul>
+                                <li>Millions of users</li>
+                                <li>Terabytes of data</li>
+                                <li>Gilt, Etsy, Ora.TV, Freelotto</li>
+                            </ul>
+                            <li>Surge Conference</li>
+                            <ul>
+                                <li> <a href="http://omniti.com/surge">http://surge.omniti.com</a></li>
+                                <li> Annually in Sept</li>
+                            </ul>
+                            <li>We're hiring!</li>
+                            <ul>
+                                <li><a href="http://omniti.com/is/hiring">http://omniti.com/is/hiring</a></li>
+                                <li>SysAdmins, DBAs, Developers
+                                <li>Remote work</li>
+                        </ul>
+                    </p>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <section>
+                        <h2>PG Extractor</h2>
+                        <ul>
+                            <li>pg_dump/pg_restore limitations (-t, -n, -P)</li>
+                            <li>Filter by schema, table, view, function, type, owner</li>
+                            <li>Dumps each database object to its own file</li>
+                            <li>Regex matching</li>
+                            <li>Full Python class (requires python 3)</li>
+                        </ul>
+
+                        <aside class="notes">
+- pg_dump only provides explicit name filters for tables & schemas. All into one file.
+ - pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.
+        - Only dumps ACLs and comments for tables.
+- Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.
+- Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!
+- Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out
+- Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!
+
+- Demo with pgopen database in my work vm
+perl pg_extractor.pl –help (show all options)
+perl pg_extractor.pl -d pgopen –getall
+perl pg_extractor.pl -d pgopen -T_file=exclude_list –gettables –getdata
+Do command from README for existing dump
+
+ PG Extractor puts that ACL & comment info in the files. Function ACLs are a notorious pain to get out.
+        - Can dump in plaintext or binary format
+        - Can also dump data. Good way to provide a logical database backup where you just want to be able to quickly restore a table. 
+    - Object filter can also be a separate file that lists the things you want to include or exclude.
+                        </aside>
+                    </section>
+                    <section>
+                        TODO ADD COMMAND LINE FOR DEMO HERE
+                    </section>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Extensions</h2>
+                    <ul>
+                        <li>Introduced in 9.1</li>
+                        <li>Logically grouped set of database objects</li>
+                        <ul>
+                            <li>CREATE EXTENSION pg_partman;</li>
+                        </ul>
+                        <li>Versioned</li>
+                        <ul>
+                            <li>ALTER EXTENSION pg_partman UPDATE TO '1.8.0';</li>
+                            <li>Update and revert changes predictably</li>
+                            <li>Ensure consistent code across multiple clusters</li>
+                        </ul>
+                    </ul>
+                    <aside class="notes">
+- Keep similar code on multiple systems consistent within the database itself.
+- All old contrib modules are now extensions (all v1.0 that I've seen so far).
+- Reverting an update is only possible if the extension author provides a means to do so.
+- Any language, just like postgres functions (C, Perl, Python, etc)
+- Tables currently intended for configuration information, so not dumped with pg_dump except when a flag is set. And when that's set, it dumps its data with schema dumps. Needs work.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Jobmon</h2>
+                    <ul>
+                        <li>PostgreSQL Extension</li>
+                        <li>Autonomous Functions</li>
+                        <li>Log steps of running functions</li>
+                        <li>Monitor logged functions to ensure completion</li>
+                        <li>If/When they fail, where and why</li>
+                    </ul>
+                    <aside class="notes">
+    - Autonomous function is being able to commit multiple times within a single run of a function. Oracle allows this. If any part of a function fails before it completes successfully in postgres, everything that function did is rolled back. Has its advantages, but for long running functions this can start to cause locks, especially if you run any DDL within the function.
+    - DBlink is an extension that lets you connect to another postgres database from within the database.
+    - Each connection to postgres has its own transaction block. So connect back to itself, and you can get something like autonomous function capabilities.
+    - Log steps of a running function. If/when something breaks, would normally roll back all those logged steps. This provides a way to keep those steps around even when it fails.
+    - Provides audit trail of what happened and monitoring capabilities.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Jobmon</h2>
+                        <p align="left" style="font-size:25px; line-height:30px">
+                            <b>add_job('job name');</b>
+                            <br><br>
+                            <b>add_step(job_id, 'What this step will do');</b><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... do some stuff ...<br>
+                            <b>update_step(step_id, 'good_status', 'What this step did successfully');</b>
+                            <br><br>
+                            <b>add_step(job_id, 'What this next step will do');</b><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... do some stuff in a loop ...<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>update_step(step_id, 'good_status', 'update every loop iteration to track progress');</b>
+                            <br><br>
+                            <b>add_step(job_id, 'One last step');</b><br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;... do just a bit more stuff ...<br>
+                            <b>update_step(step_id, 'good_status', 'Job finished ok');</b>
+                            <br><br>
+                            <b>close_job(job_id);</b>
+                            <br><br>
+                            EXCEPTION<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;WHEN OTHERS THEN<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>update_step(step_id, 'bad_status', 'Uh..oh...: '||coalesce(SQLERRM,'wat'));<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fail_job(job_id);</b>
+                    </p>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Jobmon</h2>
+                    <p align="left">
+                        <b>show_job('my job name', [int]);<br>
+                        show_job_like('I forgot my job's whole name', [int]);</b>
+                    </p>
+                    <pre><code data-trim>
+-[ RECORD 3 ]-----------------------------
+job_id     | 10
+owner      | keith
+job_name   | PG_JOBMON TEST BAD JOB
+start_time | 2012-09-15 00:55:44.742176-04
+end_time   | 2012-09-15 00:55:44.851514-04
+status     | CRITICAL
+pid        | 5848
+-[ RECORD 4 ]-----------------------------
+job_id     | 9
+owner      | keith
+job_name   | PG_JOBMON TEST GOOD JOB
+start_time | 2012-09-15 00:55:44.293575-04
+end_time   | 2012-09-15 00:55:44.725483-04
+status     | OK
+pid        | 5848
+                    </code></pre>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Jobmon</h2>
+                    <p align="left">
+                        <b>show_detail(job_id);<br>
+                        show_detail('job_name', [int]);</b>
+                    <pre><code data-trim>
+-[ RECORD 1 ]+------------------------------
+job_id       | 9
+step_id      | 19
+action       | Test step 1
+start_time   | 2012-09-15 00:55:44.501825-04
+end_time     | 2012-09-15 00:55:44.593389-04
+elapsed_time | 0.091564
+status       | OK
+message      | Successful Step 1
+-[ RECORD 2 ]+------------------------------
+job_id       | 9
+step_id      | 20
+action       | Test step 2
+start_time   | 2012-09-15 00:55:44.643017-04
+end_time     | 2012-09-15 00:55:44.659336-04
+elapsed_time | 0.016319
+status       | OK
+message      | Rows affected: 2
+-[ RECORD 3 ]+------------------------------
+job_id       | 9
+step_id      | 21
+action       | Test step 3
+start_time   | 2012-09-15 00:55:44.692518-04
+end_time     | 2012-09-15 00:55:44.7087-04
+elapsed_time | 0.016182
+status       | OK
+message      | Successful Step 3
+                    </code></pre>
+                    </p>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Jobmon</h2>
+                    <p align="left"><b>check_job_status();</b></p>
+                    <ul>
+                        <li>Make nagios check (command and service configs on my blog)</li>
+                        <li>Shameless plug – http://circonus.com (howto on my blog)</li>
+                    </ul>
+                    <pre><code data-trim>
+SELECT t.alert_text ||'('||c.alert_text||')' AS alert_status 
+FROM jobmon.check_job_status() c 
+JOIN jobmon.job_status_text t ON c.alert_code = t.alert_code;
+
+          alert_status          
+-------------------------------
+ OK(All jobs run successfully)
+
+                        alert_status                         
+--------------------------------------------------------------
+CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.86378-04; KEITH.ANOTHER_PROCESS: MISSING - Last run at 2012-09-13 07:16:30.169683-04;)
+
+                         alert_status                         
+--------------------------------------------------------------
+ WARNING(KEITH.SOME_CRITICAL_PROCESS: RUNNING; )
+                    </code></pre>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Mimeo</h2>
+                    <h4>Per-table Replication Extension</h4>
+                    <p style="font-size:25px" align="left"><img style="width:340px;height:200px;float:right;margin:0px 0px 15px 15px" src="640px-Mimeograph.svg.png" border="0"><i>“The stencil duplicator or mimeograph machine (often abbreviated to mimeo) is a <b>low-cost</b> printing press that works by forcing ink through a stencil onto paper...Mimeographs were a common technology in printing <b>small quantities</b>, as in office work, classroom materials, and church bulletins.” – Wikipedia</i></p>
+                    <!-- "Mimeograph". Licensed under CC BY-SA 3.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Mimeograph.svg#mediaviewer/File:Mimeograph.svg -->
+                    <aside class="notes">
+- Streaming & Log shipping replication are all-or-nothing.
+    - Bucardo & Slony are another solution, but requires a lot more setup and can be intimidating to new users or someone that just needs to copy a few tables. Also require superuser.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Mimeo</h2>
+                    <ul>
+                        <li>Traditional method: Streaming & Log Shipping Replication (<a href="https://github.com/omniti-labs/omnipitr" target="_blank">omnipitr</a>)</li>
+                        <li>Logical/Per-table replication</li>
+                        <ul>
+                            <li>Snapshot</li>
+                            <li>Incremental</li>
+                            <li>Trigger-based (DML)</li>
+                        </ul>
+                        <li>Quick setup and tear-down</li>
+                        <li>Installed & run from destination database(s)</li>
+                        <li>No superuser required</li>
+                        <li>Column filter / WHERE Condition</li>
+                        <li>Monitor & Audit Trail with PG Jobmon</li>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Types of Replication</h2>
+                    <h4>Mimeo</h4>
+                    <ul id="li30" style="font-size:25px;">
+                        <li>Snapshot</li>
+                        <ul>
+                            <li>The easy way</li>
+                            <li>Whole table replication</li>
+                            <li>Two tables w/ single view</li>
+                            <li>Brief exclusive lock to swap view source</li>
+                            <li>Minimize transactional lock during data migration</li>
+                            <li>Ideal for small or static tables</li>
+                            <li>Faster than DML replay if majority of table changes often</li>
+                            <li>Replicate column changes (new, dropped, type)</li>
+                            <li>No replication if source data has not changed</li>
+                        </ul>
+                        <li>Table</li>
+                        <ul>
+                            <li>Single table, no views</li>
+                            <li>Options to handle FK (cascade) and reset sequences</li>
+                            <li>Good for dev database</li>
+                        </ul>
+                    </ul>
+                    <aside class="notes">
+- Snapshot version can be hard to use on dev due to view
+- Functions for monitoring if columns change on the source and haven't been replicated to destination.
+- Table option is good for dev database that you don't want give write access to production
+- If table has foreign keys, option to cascade the truncate to other tables that it depends on
+	- Run replication on table with FK first then run the tables that it would cascade the truncate to after that one
+- If sequences are used, can have it reset the sequence to the value it had on production.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Types of Replication</h2>
+                    <h4>Mimeo</h4>
+                    <ul>
+                        <li>Incremental</li>
+                        <ul>
+                            <li>Control timestamp or serial column</li>
+                            <li>High transaction tables w/ timestamp or ID set every insert</li>
+                            <li>With primary/unique key, can also support updates</li>
+                            <li>DST</li>  
+                            <ul>
+                                <li>Run database in GMT/UTC</li>
+                                <li>Replication does not run</li>
+                            </ul>
+                        </ul>
+                    </ul>
+                    <aside class="notes">
+- If time, talk about boundary issues. Refer to documentation for additional info and how to configure.
+- At this time, mention that table, snapshot & incremental require no write privileges on the source (triggers for tracking changes).
+- Lowers load on source database 
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Types of Replication</h2>
+                    <h4>Mimeo</h4>
+                    <ul>
+                        <li>DML</li>
+                        <ul>
+                            <li>Replay Inserts, Updates, Deletes</li>
+                            <li>Trigger w/ queue table on source</li>
+                            <li>Doesn't actually replay</li>
+                            <ul>
+                                <li>Queue table of only primary/unique key values</li>
+                                <li>Distinct on queue table</li>
+                                <li>Delete all matches on destination &amp; re-insert</li>
+                            </ul>
+                            <li>Supports multiple destinations</li>
+                        </ul>
+                    </ul>
+                    <aside class="notes">
+- Only permissions needed on source role are SELECT & TRIGGER (owner required for removal due to DROP TRIGGER restriction)
+- Queue table and function are kept in schema that is owned by mimeo source user
+- Automatically grants needed privileges on the trigger function & queue table to other source roles that have write privileges on the source table.
+- Limit of 100 destinations. Ridiculous if you even come close since each destination increases the number of tables being written to for every table write.
+                    </aside>
+
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Types of Replication</h2>
+                    <h4>Mimeo</h4>
+                    <ul>
+                        <li>Log Deletes</li>
+                        <ul>
+                            <li>Same methods as DML but does not replay deletes</li>
+                            <li>Common in data warehousing</li>
+                            <li>Queue table stores entire row if it's deleted</li>
+                            <li>Destination has special column with timestamp of row's deletion</li>
+                        </ul>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Use Cases</h2>
+                    <h4>Mimeo</h4>
+                    <ul>
+                        <li>Table audit</li>
+                        <ul>
+                            <li>Trigger to track all changes to audit table w/ audit_timestamp column</li>
+                            <li>Use incremental replication on audit table to pull to data warehouse.</li>
+                            <li>Time-based partitioning on source audit table to easily drop old data with minimal impact on production.</li>
+                        </ul>
+                        <li>Database Upgrade</li>
+                        <ul>
+                            <li>Can connect with dblink to any version that supports it</li>
+                            <li>Setup replication for larger tables to minimize downtime for pg_dump upgrade method.</li>
+                        </ul>
+                    </ul>
+                    <aside class="notes">
+Special version of refresh functions for source database without newer features (wCTE, window functions, arrag_agg ORDER BY). Works back to 8.1 so far.
+Mention shared table scenario from client
+Single table shared across many systems for performance, replicated to a single reporting database.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PG Partition Manager</h2>
+                    <ul>
+                        <li>Current partition management is entirely manual</li>
+                        <ul>
+                            <li><a href="http://www.postgresql.org/docs/current/static/ddl-partitioning.html" target="_blank">http://www.postgresql.org/docs/current/static/ddl-partitioning.html</a></li>
+                        </ul>
+                        <li>Custom write all tables, triggers, functions, rules, etc.</li>
+                        <li>Core devs working on getting it built in</li>
+                        <li>In the mean time ...</li>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Automated Creation</h2>
+                    <h4>pg_partman</h4>
+                    <ul id="li30" style="font-size:25px;">
+                        <li>Time & Serial Based Partitioning</li>
+                        <ul>
+                            <li>Yearly, Quarterly, Monthly, Weekly, Daily, Hourly, ½ hour, ¼ hour</li>
+                            <li>Custom time interval</li>
+                            <li>Multi-level Sub-partitioning</li>
+                        </ul>
+                        <li>Static & Dynamic Triggers</li>
+                        <li>Pre-creates partitions </li>
+                        <li>Manage child table properties from parent</li>
+                        <ul>
+                            <li>Indexes, constraints, defaults, privileges, ownership, oids</li>
+                            <li>Foreign keys & unlogged coming soon!</li>
+                        </ul>
+                        <li>Automatically updates trigger functions as needed.</li>
+                        <li>Handles object name length limit (63 char)</li>
+                        <li>Constraint exclusion on non-partitioned column(s)</li>
+                    </ul>
+                    <aside class="notes">
+Time-based uses scheduled job
+Serial-based creates next partition when current reaches 50% of max constraint value by default. Option to have them created manually via cron same as time.
+Precreation avoids race conditions when inserting data at time of table creation. Can customize how far ahead it precreates
+Python script to check primary/unique key values are actually unique across partitions
+Data that doesn't match trigger function or doesn't have a child table goes to parent.
+Constraint exclusion based on premake value.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Automated Creation</h2>
+                    <h4>pg_partman</h4>
+                    <ul>
+                        <li>Python script to partition existing data
+                        <li>Commits after each partition created
+                        <li>Commit in smaller batches with configured wait
+                        <li>Partition live, production tables
+                        <li>Partitioned 74 mil row table by day (30 days of data)
+                        <ul>
+                            <li>Committed in hourly blocks w/ 5 second wait
+                            <li>Streaming slave never fell more than 100 seconds behind
+                            <li>2-3 second lock on parent was only interruption
+                        </ul>
+                    </ul>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Static Partitioning</h2>
+                    <h4>pg_partman</h4>
+                    <p align="left">Readable functions!</p>
+                    <pre><small>
+CREATE OR REPLACE FUNCTION partman_test.time_static_table_part_trig_func()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$ 
+        BEGIN 
+        IF TG_OP = 'INSERT' THEN 
+            IF NEW.col3 >= '2013-03-21 00:00:00-04' AND NEW.col3 < '2013-03-22 00:00:00-04' THEN 
+                INSERT INTO partman_test.time_static_table_p2013_03_21 VALUES (NEW.*); 
+            ELSIF NEW.col3 >= '2013-03-20 00:00:00-04' AND NEW.col3 < '2013-03-21 00:00:00-04' THEN 
+                INSERT INTO partman_test.time_static_table_p2013_03_20 VALUES (NEW.*); 
+            ELSIF NEW.col3 >= '2013-03-22 00:00:00-04' AND NEW.col3 < '2013-03-23 00:00:00-04' THEN 
+                INSERT INTO partman_test.time_static_table_p2013_03_22 VALUES (NEW.*); 
+            ELSIF NEW.col3 >= '2013-03-19 00:00:00-04' AND NEW.col3 < '2013-03-20 00:00:00-04' THEN 
+                INSERT INTO partman_test.time_static_table_p2013_03_19 VALUES (NEW.*); 
+            ELSIF NEW.col3 >= '2013-03-23 00:00:00-04' AND NEW.col3 < '2013-03-24 00:00:00-04' THEN 
+                INSERT INTO partman_test.time_static_table_p2013_03_23 VALUES (NEW.*);  
+            ELSE 
+                RETURN NEW; 
+            END IF; 
+        END IF; 
+        RETURN NULL; 
+        END $function$
+                    </small></pre>
+                    <aside class="notes">
+Starts with current partition. Goes back one, then forward one. Continues in that pattern for whatever premake was configured for. This was premake = 2 so handles 2 in the past & 2 in the future.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Dynamic Partitioning</h2>
+                    <h4>pg_partman</h4>
+                    <pre><code data-trim>
+CREATE OR REPLACE FUNCTION partman_test.time_dynamic_table_part_trig_func()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$ 
+        DECLARE
+            v_count                 int;
+            v_partition_name        text;
+            v_partition_timestamp   timestamptz;
+            v_schemaname            text;
+            v_tablename             text;
+        BEGIN 
+        IF TG_OP = 'INSERT' THEN 
+            v_partition_timestamp := date_trunc('day', NEW.col3);
+            v_partition_name := 'partman_test.time_dynamic_table_p'|| to_char(v_partition_timestamp, 'YYYY_MM_DD');
+            v_schemaname := split_part(v_partition_name, '.', 1); 
+            v_tablename := split_part(v_partition_name, '.', 2);
+            SELECT count(*) INTO v_count FROM pg_tables WHERE schemaname = v_schemaname AND tablename = v_tablename;
+            IF v_count > 0 THEN 
+                EXECUTE 'INSERT INTO '||v_partition_name||' VALUES($1.*)' USING NEW;
+            ELSE
+                RETURN NEW;
+            END IF;
+        END IF;
+        
+        RETURN NULL; 
+        END $function$
+                    </code></pre>
+                    <aside class="notes">
+Custom time partitioning uses this method along with a lookup table, so it's the least performant although the most flexible for time interval needs.
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Automated Destruction</h2>
+                    <h4>pg_partman</h4>
+                    <ul>
+                        <li>Configurable retention policy</li>
+                        <ul>
+                            <li>Time: Drop tables with values older than 3 months</li>
+                            <li>Serial: Drop tables with values less than 1000 minus current max</li>
+                        </ul>
+                        <li>By default only uninherits</li>
+                        <li>Can drop old tables or only their indexes</li>
+                        <li>Dump out tables for archiving</li>
+                        <li>Undo partitioning</li>
+                    </ul>
+                    <aside class="notes">
+- Dump out tables uses pg_dump and does not drop the table until pg_dump returns successfully.
+- SHA-512 Hash of dump files.
+- Can undo partitioning not made by pg_partman 
+
+Demo If time
+                    </aside>
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>PgTAP</h2>
+                    <ul>
+                        <li>Unit testing for PostgreSQL queries, schema &amp; scripting</li>
+                        <li>Essential for extension development</li>
+                        <li> ... and your sanity</li>
+                        <li><a href="http://pgtap.org" target="_blank">http://pgtap.org</a></li>
+                    </ul>  
+                </section>
+
+                <section data-background="css/theme/omniti_bg_logo.png">
+                    <h2>Links</h2>
+                    <ul>
+                        <li><a href="https://github.com/omniti-labs/pg_extractor" target="_blank">https://github.com/omniti-labs/pg_extractor</a></li>
+                        <li><a href="https://github.com/omniti-labs/pg_jobmon" target="_blank">https://github.com/omniti-labs/pg_jobmon</a></li>
+                        <li><a href="https://github.com/omniti-labs/mimeo" target="_blank">https://github.com/omniti-labs/mimeo</a></li>
+                        <li><a href="https://github.com/keithf4/pg_partman" target="_blank">https://github.com/keithf4/pg_partman</a></li>
+                        <li>Make cool presentations like this - <a href="https://github.com/hakimel/reveal.js" target="_blank">reveal.js</a>
+                    </ul>
+                    <br><br>
+                    <p>
+                    <small>Presented by <a href="http://keithf4.com" target="_blank">Keith Fiske</a> / <a href="http://twitter.com/keithf4" target="_blank">@keithf4</a></small><br>
+                    <small>Database Administrator @ <a href="http://www.omniti.com" target="_blank">OmniTI</a></small>
+                    </p>
+    </section>
+
+            </div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			// Full list of configuration options available here:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+                slideNumber: true,
+
+				theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+				transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+				// Parallax scrolling
+				// parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+				// parallaxBackgroundSize: '2100px 900px',
+
+				// Optional libraries used to extend on reveal.js
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
