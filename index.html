@@ -88,29 +88,32 @@
                             <li>pg_dump/pg_restore limitations (-t, -n, -P)</li>
                             <li>Filter by schema, table, view, function, type, owner</li>
                             <li>Dumps each database object to its own file</li>
+                            <ul>
+                                <li>Includes all privileges (even for function) in each file</li>
+                            </ul>
                             <li>Regex matching</li>
                             <li>Full Python class (requires python 3)</li>
                         </ul>
 
                         <aside class="notes">
-- pg_dump only provides explicit name filters for tables & schemas. All into one file.
- - pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.
-        - Only dumps ACLs and comments for tables.
-- Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.
-- Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!
-- Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out
-- Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!
+                            <ul>
+                                <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.
+                                <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.
+                                <li>Only dumps ACLs and comments for tables.
+                                <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.
+                                <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!
+                                <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out
+                                <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!
+                                <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
+                            </ul>
 
-- Demo with pgopen database in my work vm
-perl pg_extractor.pl –help (show all options)
-perl pg_extractor.pl -d pgopen –getall
-perl pg_extractor.pl -d pgopen -T_file=exclude_list –gettables –getdata
-Do command from README for existing dump
-
- PG Extractor puts that ACL & comment info in the files. Function ACLs are a notorious pain to get out.
-        - Can dump in plaintext or binary format
-        - Can also dump data. Good way to provide a logical database backup where you just want to be able to quickly restore a table. 
-    - Object filter can also be a separate file that lists the things you want to include or exclude.
+                            Demo database in my work vm
+                            <pre>
+python pg_extractor.py –help (show all options)
+python pg_extractor.py -d demo –getall
+python pg_extractor.py -d demo -T_file=exclude_list –gettables –getdata
+                            </pre>
+                            Do command from README for existing dump
                         </aside>
                     </section>
                     <section>
