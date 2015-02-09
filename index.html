@@ -82,43 +82,38 @@
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
-                    <section>
-                        <h2>PG Extractor</h2>
+                    <h2>PG Extractor</h2>
+                    <ul>
+                        <li>pg_dump/pg_restore limitations (-t, -n, -P)</li>
+                        <li>Filter by schema, table, view, function, type, owner</li>
+                        <li>Dumps each database object to its own file</li>
                         <ul>
-                            <li>pg_dump/pg_restore limitations (-t, -n, -P)</li>
-                            <li>Filter by schema, table, view, function, type, owner</li>
-                            <li>Dumps each database object to its own file</li>
-                            <ul>
-                                <li>Includes all privileges (even for function) in each file</li>
-                            </ul>
-                            <li>Regex matching</li>
-                            <li>Full Python class (requires python 3)</li>
+                            <li>Includes all privileges (even for function) in each file</li>
+                        </ul>
+                        <li>Regex matching</li>
+                        <li>Full Python class (requires python 3)</li>
+                    </ul>
+
+                    <aside class="notes">
+                        <ul>
+                            <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.</li>
+                            <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.</li>
+                            <li>Only dumps ACLs and comments for tables.</li>
+                            <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.</li>
+                            <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!</li>
+                            <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out</li>
+                            <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!</li>
+                            <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
                         </ul>
 
-                        <aside class="notes">
-                            <ul>
-                                <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.</li>
-                                <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.</li>
-                                <li>Only dumps ACLs and comments for tables.</li>
-                                <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.</li>
-                                <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!</li>
-                                <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out</li>
-                                <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!</li>
-                                <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
-                            </ul>
-
-                            Demo database in my work vm
-                            <pre>
+                        Demo database in my work vm
+                        <pre>
 python pg_extractor.py –help (show all options)
 python pg_extractor.py -d demo –getall
 python pg_extractor.py -d demo -T_file=exclude_list –gettables –getdata
-                            </pre>
-                            Do command from README for existing dump
-                        </aside>
-                    </section>
-                    <section>
-                        TODO ADD COMMAND LINE FOR DEMO HERE
-                    </section>
+                        </pre>
+                        Do command from README for existing dump
+                    </aside>
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
