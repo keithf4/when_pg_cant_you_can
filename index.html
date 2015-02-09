@@ -97,13 +97,13 @@
 
                         <aside class="notes">
                             <ul>
-                                <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.
-                                <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.
-                                <li>Only dumps ACLs and comments for tables.
-                                <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.
-                                <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!
-                                <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out
-                                <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!
+                                <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.</li>
+                                <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.</li>
+                                <li>Only dumps ACLs and comments for tables.</li>
+                                <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.</li>
+                                <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!</li>
+                                <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out</li>
+                                <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!</li>
                                 <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
                             </ul>
 
@@ -137,11 +137,13 @@ python pg_extractor.py -d demo -T_file=exclude_list –gettables –getdata
                         </ul>
                     </ul>
                     <aside class="notes">
-- Keep similar code on multiple systems consistent within the database itself.
-- All old contrib modules are now extensions (all v1.0 that I've seen so far).
-- Reverting an update is only possible if the extension author provides a means to do so.
-- Any language, just like postgres functions (C, Perl, Python, etc)
-- Tables currently intended for configuration information, so not dumped with pg_dump except when a flag is set. And when that's set, it dumps its data with schema dumps. Needs work.
+                        <ul>
+                            <li>Keep similar code on multiple systems consistent within the database itself.</li>
+                            <li>All old contrib modules are now extensions (all v1.0 that I've seen so far).</li>
+                            <li>- Reverting an update is only possible if the extension author provides a means to do so.</li>
+                            <li>- Any language, just like postgres functions (C, Perl, Python, etc)</li>
+                            <li>- Tables currently intended for configuration information, so not dumped with pg_dump except when a flag is set. And when that's set, it dumps its data with schema dumps. Needs work.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -155,11 +157,13 @@ python pg_extractor.py -d demo -T_file=exclude_list –gettables –getdata
                         <li>If/When they fail, where and why</li>
                     </ul>
                     <aside class="notes">
-    - Autonomous function is being able to commit multiple times within a single run of a function. Oracle allows this. If any part of a function fails before it completes successfully in postgres, everything that function did is rolled back. Has its advantages, but for long running functions this can start to cause locks, especially if you run any DDL within the function.
-    - DBlink is an extension that lets you connect to another postgres database from within the database.
-    - Each connection to postgres has its own transaction block. So connect back to itself, and you can get something like autonomous function capabilities.
-    - Log steps of a running function. If/when something breaks, would normally roll back all those logged steps. This provides a way to keep those steps around even when it fails.
-    - Provides audit trail of what happened and monitoring capabilities.
+                        <ul>
+                            <li>Autonomous function is being able to commit multiple times within a single run of a function. Oracle allows this. If any part of a function fails before it completes successfully in postgres, everything that function did is rolled back. Has its advantages, but for long running functions this can start to cause locks, especially if you run any DDL within the function.</li>
+                            <li>DBlink is an extension that lets you connect to another postgres database from within the database.</li>
+                            <li>Each connection to postgres has its own transaction block. So connect back to itself, and you can get something like autonomous function capabilities.</li>
+                            <li>Log steps of a running function. If/when something breaks, would normally roll back all those logged steps. This provides a way to keep those steps around even when it fails.</li>
+                            <li>Provides audit trail of what happened and monitoring capabilities.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -284,8 +288,10 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                     <p style="font-size:25px" align="left"><img style="width:340px;height:200px;float:right;margin:0px 0px 15px 15px" src="640px-Mimeograph.svg.png" border="0"><i>“The stencil duplicator or mimeograph machine (often abbreviated to mimeo) is a <b>low-cost</b> printing press that works by forcing ink through a stencil onto paper...Mimeographs were a common technology in printing <b>small quantities</b>, as in office work, classroom materials, and church bulletins.” – Wikipedia</i></p>
                     <!-- "Mimeograph". Licensed under CC BY-SA 3.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Mimeograph.svg#mediaviewer/File:Mimeograph.svg -->
                     <aside class="notes">
-- Streaming & Log shipping replication are all-or-nothing.
-    - Bucardo & Slony are another solution, but requires a lot more setup and can be intimidating to new users or someone that just needs to copy a few tables. Also require superuser.
+                        <ul>
+                            <li>Streaming &amp; Log shipping replication are all-or-nothing</li>
+                            <li>Bucardo & Slony are another solution, but requires a lot more setup and can be intimidating to new users or someone that just needs to copy a few tables. Also require superuser.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -331,12 +337,16 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
-- Snapshot version can be hard to use on dev due to view
-- Functions for monitoring if columns change on the source and haven't been replicated to destination.
-- Table option is good for dev database that you don't want give write access to production
-- If table has foreign keys, option to cascade the truncate to other tables that it depends on
-	- Run replication on table with FK first then run the tables that it would cascade the truncate to after that one
-- If sequences are used, can have it reset the sequence to the value it had on production.
+                        <ul>
+                            <li>Snapshot version can be hard to use on dev due to view</li>
+                            <li>Functions for monitoring if columns change on the source and haven't been replicated to destination.</li>
+                            <li>Table option is good for dev database that you don't want give write access to production</li>
+                            <li>If table has foreign keys, option to cascade the truncate to other tables that it depends on</li>
+                            <ul>
+                                <li>Run replication on table with FK first then run the tables that it would cascade the truncate to after that one</li>
+                            </ul>
+                            <li>If sequences are used, can have it reset the sequence to the value it had on production.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -357,9 +367,11 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
-- If time, talk about boundary issues. Refer to documentation for additional info and how to configure.
-- At this time, mention that table, snapshot & incremental require no write privileges on the source (triggers for tracking changes).
-- Lowers load on source database 
+                        <ul>
+                            <li>If time, talk about boundary issues. Refer to documentation for additional info and how to configure.</li>
+                            <li>At this time, mention that table, snapshot & incremental require no write privileges on the source (triggers for tracking changes).</li>
+                            <li>Lowers load on source database </li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -381,10 +393,12 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
-- Only permissions needed on source role are SELECT & TRIGGER (owner required for removal due to DROP TRIGGER restriction)
-- Queue table and function are kept in schema that is owned by mimeo source user
-- Automatically grants needed privileges on the trigger function & queue table to other source roles that have write privileges on the source table.
-- Limit of 100 destinations. Ridiculous if you even come close since each destination increases the number of tables being written to for every table write.
+                        <ul>
+                            <li>- Only permissions needed on source role are SELECT & TRIGGER (owner required for removal due to DROP TRIGGER restriction)</li>
+                            <li>- Queue table and function are kept in schema that is owned by mimeo source user</li>
+                            <li>- Automatically grants needed privileges on the trigger function & queue table to other source roles that have write privileges on the source table.</li>
+                            <li>- Limit of 100 destinations. Ridiculous if you even come close since each destination increases the number of tables being written to for every table write.</li>
+                        </ul>
                     </aside>
 
                 </section>
@@ -420,9 +434,11 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
-Special version of refresh functions for source database without newer features (wCTE, window functions, arrag_agg ORDER BY). Works back to 8.1 so far.
-Mention shared table scenario from client
-Single table shared across many systems for performance, replicated to a single reporting database.
+                        <ul>
+                            <li>Special version of refresh functions for source database without newer features (wCTE, window functions, arrag_agg ORDER BY). Works back to 8.1 so far.</li>
+                            <li>Mention shared table scenario from client</li>
+                            <li>Single table shared across many systems for performance, replicated to a single reporting database.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -461,12 +477,14 @@ Single table shared across many systems for performance, replicated to a single 
                         <li>Constraint exclusion on non-partitioned column(s)</li>
                     </ul>
                     <aside class="notes">
-Time-based uses scheduled job
-Serial-based creates next partition when current reaches 50% of max constraint value by default. Option to have them created manually via cron same as time.
-Precreation avoids race conditions when inserting data at time of table creation. Can customize how far ahead it precreates
-Python script to check primary/unique key values are actually unique across partitions
-Data that doesn't match trigger function or doesn't have a child table goes to parent.
-Constraint exclusion based on premake value.
+                        <ul>
+                            <li>Serial-based creates next partition when current reaches 50% of max constraint value by default.</li>
+                            <li>Time-based uses scheduled job. Serial can as well if you have contention with the 50% method</li>
+                            <li>Precreation avoids race conditions when inserting data at time of table creation. Can customize how far ahead it precreates</li>
+                            <li>Python script to check primary/unique key values are actually unique across partitions</li>
+                            <li>Data that doesn't match trigger function or doesn't have a child table goes to parent.</li>
+                            <li>Constraint exclusion based on premake value.</li>
+                        </ul>
                     </aside>
                 </section>
 
@@ -516,7 +534,7 @@ AS $function$
         END $function$
                     </code></pre>
                     <aside class="notes">
-Starts with current partition. Goes back one, then forward one. Continues in that pattern for whatever premake was configured for. This was premake = 2 so handles 2 in the past & 2 in the future.
+                        Starts with current partition. Goes back one, then forward one. Continues in that pattern for whatever premake was configured for. This was premake = 2 so handles 2 in the past & 2 in the future.
                     </aside>
                 </section>
 
@@ -552,7 +570,7 @@ AS $function$
         END $function$
                     </code></pre>
                     <aside class="notes">
-Custom time partitioning uses this method along with a lookup table, so it's the least performant although the most flexible for time interval needs.
+                        Custom time partitioning uses this method along with a lookup table, so it's the least performant although the most flexible for time interval needs.
                     </aside>
                 </section>
 
@@ -571,11 +589,12 @@ Custom time partitioning uses this method along with a lookup table, so it's the
                         <li>Undo partitioning</li>
                     </ul>
                     <aside class="notes">
-- Dump out tables uses pg_dump and does not drop the table until pg_dump returns successfully.
-- SHA-512 Hash of dump files.
-- Can undo partitioning not made by pg_partman 
-
-Demo If time
+                        <ul>
+                            <li>Dump out tables uses pg_dump and does not drop the table until pg_dump returns successfully.
+                            <li>SHA-512 Hash of dump files.
+                            <li>Can undo partitioning not made by pg_partman 
+                        </ul>
+                        Demo If time
                     </aside>
                 </section>
 
