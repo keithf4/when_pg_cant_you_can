@@ -84,7 +84,7 @@
                 <section data-background="css/theme/omniti_bg_logo.png">
                     <h2>PG Extractor</h2>
                     <ul>
-                        <li>pg_dump/pg_restore limitations (-t, -n, -P)</li>
+                        <li>Overcomes pg_dump/pg_restore limitations (-t, -n, -P)</li>
                         <li>Filter by schema, table, view, function, type, owner</li>
                         <li>Dumps each database object to its own file</li>
                         <ul>
@@ -102,15 +102,27 @@
                             <li>Started with perl script that had SQL functions to dump and rebuild schema from the system tables. 9.0 broke that real quick.</li>
                             <li>Rewrote to use only pg_dump/pg_restore and the magic of perl to format things from there. Been using python more lately, so rewrote in python for 2.0. Stable released this week!</li>
                             <li>Python version is a full class with public methods for getting a dictionary/JSON formatted list of the pg_restore -l list out</li>
-                            <li>Requires 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!</li>
+                            <li>Requires Python 3. Text handling is more consistent in python 3 and trying to help encourage the move from 2 to 3. All major distros have 3 available (even OmniOS), so use it!</li>
                             <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
                         </ul>
 
                         Demo database in my work vm
                         <pre>
-python pg_extractor.py –help (show all options)
-python pg_extractor.py -d demo –getall
-python pg_extractor.py -d demo -T_file=exclude_list –gettables –getdata
+python3 pg_extractor.py --help (show all options)
+python3 pg_extractor.py -d demo --getall --keep_dump
+python3 pg_extractor.py -d demo --table_exclude_file=exclude_list –gettables –getdata
+
+Python 3.3.1 (default, Sep 25 2013, 19:29:01) 
+[GCC 4.7.3] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> from pg_extractor import PGExtractor
+>>> p = PGExtractor()
+>>> object_list = p.build_main_object_list("demo/dump/pg_extractor_dump.pgr")
+>>> table_object_list = p.build_type_object_list(object_list, ['TABLE'])
+>>> for o in object_list:
+...  print(o)
+>>> for t in table_object_list:
+...  print(t)
                         </pre>
                         Do command from README for existing dump
                     </aside>
