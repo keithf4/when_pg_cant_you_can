@@ -82,6 +82,7 @@
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
+                    <section>
                     <h2>PG Extractor</h2>
                     <ul>
                         <li>Overcomes pg_dump/pg_restore limitations (-t, -n, -P)</li>
@@ -95,6 +96,7 @@
                     </ul>
 
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>pg_dump only provides explicit name filters for tables & schemas. All into one file.</li>
                             <li>pg_restore has some additional filtering options, but requires you to first to a binary dump with pg_dump and then restore from that.</li>
@@ -106,8 +108,15 @@
                             <li>- Object filter can also be a separate file that lists the things you want to include or exclude.</li>
                         </ul>
 
-                        Demo database in my work vm
-                        <pre>
+                        </small>
+                    </aside>
+                    </section>
+                    <section>
+                        <iframe src="https://localhost:4200" height="600" width="1200"></iframe>
+                        <aside class="notes">
+                            <small>
+                                Demo database in my work vm
+                                <pre>
 python3 pg_extractor.py --help (show all options)
 python3 pg_extractor.py -d demo --getall --keep_dump
 python3 pg_extractor.py -d demo --table_exclude_file=exclude_list –gettables –getdata
@@ -123,9 +132,15 @@ Type "help", "copyright", "credits" or "license" for more information.
 ...  print(o)
 >>> for t in table_object_list:
 ...  print(t)
-                        </pre>
-                        Do command from README for existing dump
-                    </aside>
+                                </pre>
+                                Do command from README for existing dump
+
+                            </small>
+
+                        </aside>
+
+                    </section>
+
                 </section>
 
                 <section data-background="css/theme/omniti_bg_logo.png">
@@ -144,6 +159,7 @@ Type "help", "copyright", "credits" or "license" for more information.
                         </ul>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Keep similar code on multiple systems consistent within the database itself.</li>
                             <li>All old contrib modules are now extensions (all v1.0 that I've seen so far).</li>
@@ -151,6 +167,7 @@ Type "help", "copyright", "credits" or "license" for more information.
                             <li>- Any language, just like postgres functions (C, Perl, Python, etc)</li>
                             <li>- Tables currently intended for configuration information, so not dumped with pg_dump except when a flag is set. And when that's set, it dumps its data with schema dumps. Needs work.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -164,6 +181,7 @@ Type "help", "copyright", "credits" or "license" for more information.
                         <li>If/When they fail, where and why</li>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Autonomous function is being able to commit multiple times within a single run of a function. Oracle allows this. If any part of a function fails before it completes successfully in postgres, everything that function did is rolled back. Has its advantages, but for long running functions this can start to cause locks, especially if you run any DDL within the function.</li>
                             <li>DBlink is an extension that lets you connect to another postgres database from within the database.</li>
@@ -171,6 +189,7 @@ Type "help", "copyright", "credits" or "license" for more information.
                             <li>Log steps of a running function. If/when something breaks, would normally roll back all those logged steps. This provides a way to keep those steps around even when it fails.</li>
                             <li>Provides audit trail of what happened and monitoring capabilities.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -268,7 +287,7 @@ message      | Successful Step 3
                     <p align="left"><b>check_job_status();</b></p>
                     <ul>
                         <li>Make nagios check (command and service configs on my blog)</li>
-                        <li>Shameless plug – http://circonus.com (howto on my blog)</li>
+                        <li>Shameless plug – <a href="http://circonus.com" target="_blank">http://www.circonus.com</a> (howto on my blog)</li>
                     </ul>
                     <pre><code data-trim>
 SELECT t.alert_text ||'('||c.alert_text||')' AS alert_status 
@@ -295,10 +314,12 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                     <p style="font-size:25px" align="left"><img style="width:340px;height:200px;float:right;margin:0px 0px 15px 15px" src="640px-Mimeograph.svg.png" border="0"><i>“The stencil duplicator or mimeograph machine (often abbreviated to mimeo) is a <b>low-cost</b> printing press that works by forcing ink through a stencil onto paper...Mimeographs were a common technology in printing <b>small quantities</b>, as in office work, classroom materials, and church bulletins.” – Wikipedia</i></p>
                     <!-- "Mimeograph". Licensed under CC BY-SA 3.0 via Wikimedia Commons - http://commons.wikimedia.org/wiki/File:Mimeograph.svg#mediaviewer/File:Mimeograph.svg -->
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Streaming &amp; Log shipping replication are all-or-nothing</li>
                             <li>Bucardo & Slony are another solution, but requires a lot more setup and can be intimidating to new users or someone that just needs to copy a few tables. Also require superuser.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -344,6 +365,7 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Snapshot version can be hard to use on dev due to view</li>
                             <li>Functions for monitoring if columns change on the source and haven't been replicated to destination.</li>
@@ -354,6 +376,7 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                             </ul>
                             <li>If sequences are used, can have it reset the sequence to the value it had on production.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -374,11 +397,13 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>If time, talk about boundary issues. Refer to documentation for additional info and how to configure.</li>
                             <li>At this time, mention that table, snapshot & incremental require no write privileges on the source (triggers for tracking changes).</li>
                             <li>Lowers load on source database </li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -400,12 +425,14 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>- Only permissions needed on source role are SELECT & TRIGGER (owner required for removal due to DROP TRIGGER restriction)</li>
                             <li>- Queue table and function are kept in schema that is owned by mimeo source user</li>
                             <li>- Automatically grants needed privileges on the trigger function & queue table to other source roles that have write privileges on the source table.</li>
                             <li>- Limit of 100 destinations. Ridiculous if you even come close since each destination increases the number of tables being written to for every table write.</li>
                         </ul>
+                        </small>
                     </aside>
 
                 </section>
@@ -441,11 +468,13 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         </ul>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Special version of refresh functions for source database without newer features (wCTE, window functions, arrag_agg ORDER BY). Works back to 8.1 so far.</li>
                             <li>Mention shared table scenario from client</li>
                             <li>Single table shared across many systems for performance, replicated to a single reporting database.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -484,6 +513,7 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                         <li>Constraint exclusion on non-partitioned column(s)</li>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Serial-based creates next partition when current reaches 50% of max constraint value by default.</li>
                             <li>Time-based uses scheduled job. Serial can as well if you have contention with the 50% method</li>
@@ -492,6 +522,7 @@ CRITICAL(KEITH.SOME_OTHER_PROCESS: MISSING - Last run at 2012-09-13 07:17:07.863
                             <li>Data that doesn't match trigger function or doesn't have a child table goes to parent.</li>
                             <li>Constraint exclusion based on premake value.</li>
                         </ul>
+                        </small>
                     </aside>
                 </section>
 
@@ -596,12 +627,14 @@ AS $function$
                         <li>Undo partitioning</li>
                     </ul>
                     <aside class="notes">
+                        <small>
                         <ul>
                             <li>Dump out tables uses pg_dump and does not drop the table until pg_dump returns successfully.
                             <li>SHA-512 Hash of dump files.
                             <li>Can undo partitioning not made by pg_partman 
                         </ul>
                         Demo If time
+                        </small>
                     </aside>
                 </section>
 
